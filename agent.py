@@ -18,10 +18,10 @@ import sys
 import time
 from pathlib import Path
 
-from openai import OpenAI, RateLimitError
+from openai import OpenAI, RateLimitError, InternalServerError, APITimeoutError
 
 # ---------- Config ----------
-MODEL = os.getenv("AGENT_MODEL", "gemini-2.5-flash")
+MODEL = os.getenv("AGENT_MODEL", "gemini-3.5-flash")
 BASE_URL = os.getenv("AGENT_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
 MAX_STEPS = 15          # hard cap so the agent can't loop forever
 MAX_FILE_CHARS = 8000   # trim big files so we don't blow the context window
@@ -130,7 +130,7 @@ def call_llm(messages):
     for attempt in range(5):
         try:
             return client.chat.completions.create(model=MODEL, messages=messages, tools=TOOLS)
-        except RateLimitError:
+        except (RateLimitError, InternalServerError, APITimeoutError):
             wait = 20 * (attempt + 1)
             print(f"  [rate limited, waiting {wait}s]")
             time.sleep(wait)
@@ -181,3 +181,6 @@ if __name__ == "__main__":
 
     client = OpenAI(api_key=api_key, base_url=BASE_URL)
     run(sys.argv[2])
+
+
+
