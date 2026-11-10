@@ -23,7 +23,7 @@ from openai import OpenAI, RateLimitError, InternalServerError, APITimeoutError
 # ---------- Config ----------
 MODEL = os.getenv("AGENT_MODEL", "gemini-3-flash-preview")
 BASE_URL = os.getenv("AGENT_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
-MAX_STEPS = 15          # hard cap so the agent can't loop forever
+MAX_STEPS = 25          # hard cap so the agent can't loop forever
 MAX_FILE_CHARS = 8000   # trim big files so we don't blow the context window
 MAX_LIST = 300          # max files returned by list_files
 CALL_DELAY = 13         # seconds between LLM calls (free tier is ~5 requests/min)
