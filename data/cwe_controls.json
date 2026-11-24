@@ -1,0 +1,43 @@
+{
+  "_about": "CWE to control mapping, maintained by hand. OWASP = Top 10:2025. NIST = SP 800-53 Rev. 5. SOC 2 = 2017 Trust Services Criteria (SOC 2 does not prescribe controls; these are the criteria a finding is usually evidence against). Verify against the official sources before using in a real audit.",
+  "_source_defaults": {
+    "osv-scanner": "CWE-1395",
+    "gitleaks:private-key": "CWE-321",
+    "gitleaks": "CWE-798"
+  },
+
+  "CWE-20":   {"name": "Improper input validation",            "owasp": "A05:2025 Injection",                         "nist": ["SI-10"],                  "soc2": ["CC7.1", "CC8.1"]},
+  "CWE-79":   {"name": "Cross-site scripting (XSS)",           "owasp": "A05:2025 Injection",                         "nist": ["SI-10", "SI-15"],         "soc2": ["CC7.1", "CC8.1"]},
+  "CWE-94":   {"name": "Code injection",                       "owasp": "A05:2025 Injection",                         "nist": ["SI-10"],                  "soc2": ["CC7.1", "CC8.1"]},
+  "CWE-95":   {"name": "Eval injection",                       "owasp": "A05:2025 Injection",                         "nist": ["SI-10"],                  "soc2": ["CC7.1", "CC8.1"]},
+  "CWE-89":   {"name": "SQL injection",                        "owasp": "A05:2025 Injection",                         "nist": ["SI-10"],                  "soc2": ["CC7.1", "CC8.1"]},
+  "CWE-943":  {"name": "NoSQL / data query injection",         "owasp": "A05:2025 Injection",                         "nist": ["SI-10"],                  "soc2": ["CC7.1", "CC8.1"]},
+
+  "CWE-639":  {"name": "Authorization bypass (IDOR)",          "owasp": "A01:2025 Broken Access Control",             "nist": ["AC-3", "AC-6"],           "soc2": ["CC6.1", "CC6.3"]},
+  "CWE-284":  {"name": "Improper access control",              "owasp": "A01:2025 Broken Access Control",             "nist": ["AC-3"],                   "soc2": ["CC6.1", "CC6.3"]},
+  "CWE-601":  {"name": "Open redirect",                        "owasp": "A01:2025 Broken Access Control",             "nist": ["SI-10"],                  "soc2": ["CC6.6", "CC8.1"]},
+  "CWE-918":  {"name": "Server-side request forgery (SSRF)",   "owasp": "A01:2025 Broken Access Control",             "nist": ["SC-7", "SI-10"],          "soc2": ["CC6.6"]},
+  "CWE-352":  {"name": "Cross-site request forgery (CSRF)",    "owasp": "A01:2025 Broken Access Control",             "nist": ["SC-23"],                  "soc2": ["CC6.1", "CC8.1"]},
+
+  "CWE-1004": {"name": "Cookie missing HttpOnly",              "owasp": "A02:2025 Security Misconfiguration",         "nist": ["SC-23", "CM-6"],          "soc2": ["CC6.1"]},
+  "CWE-614":  {"name": "Cookie missing Secure flag",           "owasp": "A02:2025 Security Misconfiguration",         "nist": ["SC-8", "SC-23"],          "soc2": ["CC6.7"]},
+  "CWE-693":  {"name": "Protection mechanism failure",         "owasp": "A02:2025 Security Misconfiguration",         "nist": ["CM-6", "CM-7"],           "soc2": ["CC6.1", "CC8.1"]},
+
+  "CWE-1395": {"name": "Dependency on vulnerable component",   "owasp": "A03:2025 Software Supply Chain Failures",    "nist": ["SI-2", "RA-5", "SR-3"],   "soc2": ["CC7.1", "CC8.1"]},
+  "CWE-1104": {"name": "Unmaintained third-party component",   "owasp": "A03:2025 Software Supply Chain Failures",    "nist": ["SI-2", "SA-22"],          "soc2": ["CC7.1", "CC8.1"]},
+  "CWE-1035": {"name": "Vulnerable third-party component",     "owasp": "A03:2025 Software Supply Chain Failures",    "nist": ["SI-2", "RA-5"],           "soc2": ["CC7.1", "CC8.1"]},
+  "CWE-1357": {"name": "Reliance on untrusted component",      "owasp": "A03:2025 Software Supply Chain Failures",    "nist": ["SR-3", "SR-11"],          "soc2": ["CC8.1", "CC9.2"]},
+
+  "CWE-319":  {"name": "Cleartext transmission",               "owasp": "A04:2025 Cryptographic Failures",            "nist": ["SC-8"],                   "soc2": ["CC6.7"]},
+  "CWE-312":  {"name": "Cleartext storage of sensitive data",  "owasp": "A04:2025 Cryptographic Failures",            "nist": ["SC-28"],                  "soc2": ["CC6.1"]},
+  "CWE-256":  {"name": "Plaintext password storage",           "owasp": "A04:2025 Cryptographic Failures",            "nist": ["IA-5(1)", "SC-28"],       "soc2": ["CC6.1"]},
+  "CWE-321":  {"name": "Hard-coded cryptographic key",         "owasp": "A04:2025 Cryptographic Failures",            "nist": ["SC-12"],                  "soc2": ["CC6.1"]},
+
+  "CWE-798":  {"name": "Hard-coded credentials",               "owasp": "A07:2025 Authentication Failures",           "nist": ["IA-5"],                   "soc2": ["CC6.1"]},
+  "CWE-522":  {"name": "Insufficiently protected credentials", "owasp": "A07:2025 Authentication Failures",           "nist": ["IA-5", "SC-23"],          "soc2": ["CC6.1"]},
+
+  "CWE-1333": {"name": "ReDoS (inefficient regex)",            "owasp": "A06:2025 Insecure Design",                   "nist": ["SC-5", "SI-10"],          "soc2": ["CC7.1"]},
+  "CWE-400":  {"name": "Uncontrolled resource consumption",    "owasp": "A06:2025 Insecure Design",                   "nist": ["SC-5"],                   "soc2": ["CC7.1"]},
+
+  "CWE-1427": {"name": "Prompt injection",                     "owasp": "n/a (see OWASP Top 10 for LLM Apps, LLM01)", "nist": ["SI-10"],                  "soc2": ["CC7.1"]}
+}
