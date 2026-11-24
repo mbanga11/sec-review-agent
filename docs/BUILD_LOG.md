@@ -29,12 +29,7 @@ Found during testing: code snippets for secret findings would have printed the s
 The repo itself is scanned with gitleaks (`gitleaks git . --redact`) before pushing: no leaks found.
 
 ## Running in Docker (sandboxed)
-
-docker build -t sec-review-agent .
-docker run --rm -e GEMINI_API_KEY -e AGENT_MODEL=gemini-3.5-flash-lite
--v /path/to/repo:/target:ro -v “$PWD/out:/out”
---cap-drop ALL --security-opt no-new-privileges --memory 2g --cpus 2 --pids-limit 256
-sec-review-agent
+See the Quick start in the main README for the full command.
 
 Guardrails: target mounted read-only, non-root user, all Linux capabilities dropped, resource limits, scanner binaries pinned and verified by SHA-256 checksum at build time, API key passed at runtime (never baked into the image), and a JSONL audit log of every tool call in `out/logs/run.jsonl`.
 In a real run, the agent tried to read two private key files: one was blocked by the key-file guard and logged, the other had already been deleted from the repo (it exists only in git history, which gitleaks flagged).
