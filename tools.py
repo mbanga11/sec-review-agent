@@ -238,3 +238,63 @@ def run_tool(name: str, raw_args: str) -> str:
         return TOOL_FUNCS[name](**args)
     except Exception as e:  # return errors to the model instead of crashing
         return f"Error: {e}"
+
+
+
+# ---------- Phase 4: triage ----------
+# The agent records a structured verdict for every candidate issue.
+# These become findings.json, which the compliance mapping and report build on.
+
+FINDINGS = []
+VERDICTS = {"true_positive", "false_positive", "needs_review"}
+SEVERITIES = ["critical", "high", "medium", "low", "info"]
+SOURCES = {"semgrep", "osv-scanner", "gitleaks", "manual"}
+
+
+def record_finding(title, file, line, verdict, severity, source, reasoning, cwe="", fix="") -> str:
+    verdict, severity, source = verdict.lower(), severity.lower(), source.lower()
+    if verdict not in VERDICTS:
+        return f"Error: verdict must be one of {sorted(VERDICTS)}"
+    if severity not in SEVERITIES:
+        return f"Error: severity must be one of {SEVERITIES}"
+    if source not in SOURCES:
+        return f"Error: source must be one of {sorted(SOURCES)}"
+    # The file must really exist, so the model can't invent locations.
+    # Gitleaks hits can be in files deleted from the current tree, so they skip this check.
+    if source != "gitleaks" and not safe_path(file).is_file():
+        return f"Error: {file} does not exist. Check the path and record again."
+    line = int(line or 0)
+    for f in FINDINGS:
+        if f["file"] == file and f["line"] == line and f["title"].lower() == title.lower():
+            return f"Already recorded as #{f['id']}. Skipped duplicate."
+    FINDINGS.append({
+        "id": len(FINDINGS) + 1,
+        "title": title, "file": file, "line": line, "cwe": cwe,
+        "severity": severity, "verdict": verdict, "source": source,
+        "reasoning": reasoning, "fix": fix,
+    })
+    return f"Recorded #{len(FINDINGS)} ({verdict})."
+
+
+def save_findings(path, meta: dict) -> dict:
+    counts = {v: sum(f["verdict"] == v for f in FINDINGS) for v in sorted(VERDICTS)}
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    Path(path).write_text(json.dumps({**meta, "counts": counts, "findings": FINDINGS}, indent=2))
+    return counts
+
+
+TOOL_FUNCS["record_finding"] = record_finding
+TOOLS.append(_tool(
+    "record_finding",
+    "Record your verdict on ONE candidate issue. Call it once per issue, including false positives.",
+    {"title": {"type": "string", "description": "Short name, e.g. 'NoSQL injection via $where'."},
+     "file": {"type": "string", "description": "File path relative to repo root."},
+     "line": {"type": "integer", "description": "Line number (0 if not line-specific)."},
+     "verdict": {"type": "string", "enum": sorted(VERDICTS)},
+     "severity": {"type": "string", "enum": SEVERITIES},
+     "source": {"type": "string", "enum": sorted(SOURCES)},
+     "cwe": {"type": "string", "description": "e.g. 'CWE-943'. Empty if unknown."},
+     "reasoning": {"type": "string", "description": "Why this verdict. For false positives, why it is not a real risk."},
+     "fix": {"type": "string", "description": "How to fix it. Empty for false positives."}},
+    ["title", "file", "line", "verdict", "severity", "source", "reasoning"],
+))
