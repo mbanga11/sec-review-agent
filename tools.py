@@ -298,3 +298,44 @@ TOOLS.append(_tool(
      "fix": {"type": "string", "description": "How to fix it. Empty for false positives."}},
     ["title", "file", "line", "verdict", "severity", "source", "reasoning"],
 ))
+
+
+# ---------- Phase 4b: self-review ----------
+# Lets the agent correct its own verdicts during the review pass.
+VERDICTS.add("duplicate")
+for t in TOOLS:
+    if t["function"]["name"] == "record_finding":
+        t["function"]["parameters"]["properties"]["verdict"]["enum"] = sorted(VERDICTS)
+
+
+def update_finding(id, verdict, reasoning, severity="") -> str:
+    verdict = verdict.lower()
+    if verdict not in VERDICTS:
+        return f"Error: verdict must be one of {sorted(VERDICTS)}"
+    for f in FINDINGS:
+        if f["id"] == int(id):
+            f["verdict"], f["reasoning"] = verdict, reasoning
+            if severity:
+                if severity.lower() not in SEVERITIES:
+                    return f"Error: severity must be one of {SEVERITIES}"
+                f["severity"] = severity.lower()
+            return f"Updated #{f['id']} -> {verdict}."
+    return f"Error: no finding #{id}"
+
+
+def findings_table() -> str:
+    rows = [f"#{f['id']} | {f['verdict']} | {f['severity']} | {f['source']} | {f['file']}:{f['line']} | {f['title']}"
+            for f in FINDINGS]
+    return "\n".join(rows) or "(none recorded)"
+
+
+TOOL_FUNCS["update_finding"] = update_finding
+TOOLS.append(_tool(
+    "update_finding",
+    "Change the verdict (and optionally severity) of a finding you already recorded. Use 'duplicate' for repeats.",
+    {"id": {"type": "integer", "description": "The finding number, e.g. 3 for #3."},
+     "verdict": {"type": "string", "enum": sorted(VERDICTS)},
+     "reasoning": {"type": "string", "description": "Why you changed it, e.g. 'duplicate of #1' or 'tutorial page link, not reachable by users'."},
+     "severity": {"type": "string", "enum": SEVERITIES}},
+    ["id", "verdict", "reasoning"],
+))
