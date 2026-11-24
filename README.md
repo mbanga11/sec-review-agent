@@ -26,3 +26,4 @@ The mapping is my own judgment and should be verified against the official frame
 ## Report
 `report.py` turns findings into a Markdown report: executive summary, fix-first list, findings by severity with code snippets, dismissed findings with reasoning, and compliance tables. See [docs/sample-report-nodegoat.md](docs/sample-report-nodegoat.md).
 Found during testing: code snippets for secret findings would have printed the secret that gitleaks had redacted. Snippets are now disabled for secret findings and key files.
+The repo itself is scanned with gitleaks (`gitleaks git . --redact`) before pushing: no leaks found.
