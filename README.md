@@ -22,3 +22,7 @@ Fix: `read_file` now blocks key and secret file types (.pem, .key, .p12, .pfx, .
 `compliance.py` maps each finding's CWE to OWASP Top 10:2025, NIST SP 800-53 Rev. 5, and SOC 2 criteria using a hand-maintained table (`data/cwe_controls.json`). No LLM is involved, so control IDs can't be hallucinated.
 NodeGoat result: 14 confirmed findings mapped to 6 OWASP categories, 9 NIST controls, and 5 SOC 2 criteria. Most affected: A03 Software Supply Chain Failures, NIST SI-2/RA-5, SOC 2 CC6.1 and CC7.1.
 The mapping is my own judgment and should be verified against the official framework sources before use in a real audit.
+
+## Report
+`report.py` turns findings into a Markdown report: executive summary, fix-first list, findings by severity with code snippets, dismissed findings with reasoning, and compliance tables. See [docs/sample-report-nodegoat.md](docs/sample-report-nodegoat.md).
+Found during testing: code snippets for secret findings would have printed the secret that gitleaks had redacted. Snippets are now disabled for secret findings and key files.
