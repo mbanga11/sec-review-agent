@@ -6,3 +6,4 @@ samples/
 reports/
 logs/
 .DS_Store
+out/

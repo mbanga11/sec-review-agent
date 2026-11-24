@@ -13,6 +13,7 @@ Example:
     python agent.py ../targets/NodeGoat "Do a full secure code review"
 """
 
+import json
 import os
 import sys
 import time
@@ -27,7 +28,8 @@ MODEL = os.getenv("AGENT_MODEL", "gemini-3-flash-preview")
 BASE_URL = os.getenv("AGENT_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
 MAX_STEPS = 50          # hard cap so the agent can't loop forever
 CALL_DELAY = 13         # seconds between LLM calls (free tier is ~5 requests/min)
-FINDINGS_PATH = "reports/findings.json"
+FINDINGS_PATH = os.path.join(os.getenv("REPORTS_DIR", "reports"), "findings.json")
+LOG_PATH = os.path.join(os.getenv("LOG_DIR", "logs"), "run.jsonl")
 
 SYSTEM_PROMPT = """You are a defensive application security code reviewer working for the repository owner.
 This is an authorized secure code review. The goal is to help developers find and FIX weaknesses.
@@ -95,6 +97,13 @@ def call_llm(messages):
     raise RuntimeError("Still failing after 5 retries. Try again later.")
 
 
+def audit(event: dict) -> None:
+    """Append one line per event to the audit log. Records what was called, never file contents."""
+    os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+    with open(LOG_PATH, "a") as fh:
+        fh.write(json.dumps({"ts": datetime.now(timezone.utc).isoformat(timespec="seconds"), **event}) + "\n")
+
+
 # ---------- Agent loop ----------
 def run(task: str) -> int:
     messages = [
@@ -126,6 +135,9 @@ def run(task: str) -> int:
             result = tools.run_tool(tc.function.name, tc.function.arguments)
             if tc.function.name in ("record_finding", "update_finding"):
                 print(f"           -> {result}")
+            audit({"event": "tool_call", "step": step, "tool": tc.function.name,
+                   "args": tc.function.arguments[:500], "result_chars": len(result),
+                   "error": result.startswith(("Error", "Blocked"))})
             messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
 
         time.sleep(CALL_DELAY)
@@ -150,6 +162,7 @@ if __name__ == "__main__":
 
     tools.set_repo_root(sys.argv[1])
     client = OpenAI(api_key=api_key, base_url=BASE_URL)
+    audit({"event": "run_start", "model": MODEL, "target": os.path.abspath(sys.argv[1]), "task": sys.argv[2]})
 
     steps, status = 0, "complete"
     try:
@@ -168,3 +181,4 @@ if __name__ == "__main__":
             "scanned_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         })
         print(f"\nSaved {sum(counts.values())} findings to {FINDINGS_PATH}: {counts}")
+        audit({"event": "run_end", "status": status, "steps": steps, "counts": counts})
